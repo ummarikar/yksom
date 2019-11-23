@@ -110,6 +110,7 @@ pub struct VM {
     pub nil_cls: Val,
     pub obj_cls: Val,
     pub str_cls: Val,
+    pub sym_cls: Val,
     pub system_cls: Val,
     pub true_cls: Val,
     pub false_: Val,
@@ -152,6 +153,7 @@ impl VM {
             nil_cls: Val::illegal(),
             obj_cls: Val::illegal(),
             str_cls: Val::illegal(),
+            sym_cls: Val::illegal(),
             system_cls: Val::illegal(),
             true_cls: Val::illegal(),
             false_: Val::illegal(),
@@ -189,6 +191,7 @@ impl VM {
         vm.false_cls = vm.init_builtin_class("False", false);
         vm.int_cls = vm.init_builtin_class("Integer", false);
         vm.str_cls = vm.init_builtin_class("String", false);
+        vm.sym_cls = vm.init_builtin_class("Symbol", false);
         vm.system_cls = vm.init_builtin_class("System", false);
         vm.true_cls = vm.init_builtin_class("True", false);
         vm.false_ = Inst::new(&vm, vm.false_cls.clone());
@@ -705,7 +708,7 @@ impl VM {
             let strings = unsafe { &mut *self.strings.get() };
             let len = strings.len();
             reverse_strings.insert(s.clone(), len);
-            strings.push(String_::new(self, s));
+            strings.push(String_::new(self, s, true));
             len
         }
     }
@@ -838,6 +841,7 @@ impl VM {
             obj_cls: Val::illegal(),
             nil_cls: Val::illegal(),
             str_cls: Val::illegal(),
+            sym_cls: Val::illegal(),
             system_cls: Val::illegal(),
             true_cls: Val::illegal(),
             false_: Val::illegal(),
