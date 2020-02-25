@@ -20,6 +20,7 @@
 //! Although this constraint is not enforced through the type system, it is not hard to obey: as
 //! soon as you create an `Obj` instance, pass it to `Val::from_obj`.
 
+mod array;
 mod block;
 mod class;
 mod double;
@@ -28,6 +29,7 @@ mod integers;
 mod method;
 mod string_;
 
+pub use array::Array;
 pub use block::{Block, BlockInfo};
 pub use class::Class;
 pub use double::Double;
@@ -47,6 +49,7 @@ use crate::vm::{
 /// The SOM type of objects.
 #[derive(Debug, PartialEq)]
 pub enum ObjType {
+    Array,
     ArbInt,
     Block,
     Class,

@@ -1,0 +1,15 @@
+"
+VM:
+  status: success
+  stdout:
+    2
+"
+
+array = (
+    run = (
+        | a |
+        a := Array new: 1.
+        a at: 1 put: 2.
+        a at: 1 println. 
+    )
+)

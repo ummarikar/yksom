@@ -54,6 +54,7 @@ pub enum Primitive {
     Name,
     NotEquals,
     New,
+    NewWithLength,
     ObjectSize,
     Perform,
     PerformInSuperClass,

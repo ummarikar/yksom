@@ -46,6 +46,8 @@ pub enum VMError {
     },
     /// Tried to access a global before it being initialised.
     InvalidSymbol,
+    /// Tried to insert or access an element that is not within the bounds of the array.
+    IndexOutOfBounds,
     /// Tried to do a shl or shr with a value below zero.
     NegativeShift,
     /// A specialised version of TypeError, because SOM has more than one number type (and casts
@@ -94,6 +96,7 @@ macro_rules! stry {
 /// with [`UnsafeCell`].
 pub struct VM {
     classpath: Vec<String>,
+    pub arr_cls: Val,
     pub block_cls: Val,
     pub block2_cls: Val,
     pub block3_cls: Val,
@@ -140,6 +143,7 @@ impl VM {
 
         let mut vm = VM {
             classpath,
+            arr_cls: Val::illegal(),
             block_cls: Val::illegal(),
             bool_cls: Val::illegal(),
             block2_cls: Val::illegal(),
@@ -194,6 +198,8 @@ impl VM {
         vm.sym_cls = vm.init_builtin_class("Symbol", false);
         vm.system_cls = vm.init_builtin_class("System", false);
         vm.true_cls = vm.init_builtin_class("True", false);
+        vm.arr_cls = vm.init_builtin_class("Array", false);
+
         unsafe { &mut *vm.globals.get() }.insert(
             vm.add_symbol("system".to_string()),
             Inst::new(&vm, vm.system_cls.clone()),
@@ -470,6 +476,14 @@ impl VM {
                     .push(stry!(stry!(rcv.downcast::<String_>(self)).to_symbol(self)));
                 SendReturn::Val
             }
+            Primitive::At => {
+                unsafe { &mut *self.stack.get() }.push(stry!(rcv.downcast::<Array>(self)).at(self, unsafe { &mut *self.stack.get() }.pop()));
+                SendReturn::Val
+            }
+            Primitive::AtPut => {
+                unsafe { &mut *self.stack.get() }.push(stry!(rcv.downcast::<Array>(self)).put(self, unsafe { &mut *self.stack.get() }.pop(), unsafe { &mut *self.stack.get() }.pop()));
+                SendReturn::Val
+            }
             Primitive::BitXor => {
                 unsafe { &mut *self.stack.get() }
                     .push(stry!(rcv.xor(self, unsafe { &mut *self.stack.get() }.pop())));
@@ -574,6 +588,10 @@ impl VM {
             }
             Primitive::New => {
                 unsafe { &mut *self.stack.get() }.push(Inst::new(self, rcv));
+                SendReturn::Val
+            }
+            Primitive::NewWithLength => {
+                unsafe { &mut *self.stack.get() }.push(Array::new(self, unsafe { &mut *self.stack.get() }.pop(), Vec::new()));
                 SendReturn::Val
             }
             Primitive::NotEquals => {
@@ -887,6 +905,7 @@ impl VM {
     pub fn new_no_bootstrap() -> Self {
         VM {
             classpath: vec![],
+            arr_cls: Val::illegal(),
             block_cls: Val::illegal(),
             block2_cls: Val::illegal(),
             block3_cls: Val::illegal(),

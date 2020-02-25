@@ -236,6 +236,8 @@ impl<'a> Compiler<'a> {
                 "sqrt" => Ok(MethodBody::Primitive(Primitive::Sqrt)),
                 "asString" => Ok(MethodBody::Primitive(Primitive::AsString)),
                 "asSymbol" => Ok(MethodBody::Primitive(Primitive::AsSymbol)),
+                "at:" => Ok(MethodBody::Primitive(Primitive::At)),
+                "at:put:" => Ok(MethodBody::Primitive(Primitive::AtPut)),
                 "class" => Ok(MethodBody::Primitive(Primitive::Class)),
                 "concatenate:" => Ok(MethodBody::Primitive(Primitive::Concatenate)),
                 "global:" => Ok(MethodBody::Primitive(Primitive::Global)),
@@ -248,6 +250,7 @@ impl<'a> Compiler<'a> {
                 "instVarNamed:" => Ok(MethodBody::Primitive(Primitive::InstVarNamed)),
                 "name" => Ok(MethodBody::Primitive(Primitive::Name)),
                 "new" => Ok(MethodBody::Primitive(Primitive::New)),
+                "new:" => Ok(MethodBody::Primitive(Primitive::NewWithLength)),
                 "objectSize" => Ok(MethodBody::Primitive(Primitive::ObjectSize)),
                 "perform:" => Ok(MethodBody::Primitive(Primitive::Perform)),
                 "perform:inSuperclass:" => {
