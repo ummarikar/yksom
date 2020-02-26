@@ -1,7 +1,6 @@
 #![allow(clippy::new_ret_no_self)]
 
-use std::str;
-
+use std::convert::TryInto;
 use abgc_derive::GcLayout;
 
 use crate::vm::{
@@ -13,7 +12,7 @@ use crate::vm::{
 #[derive(Debug, GcLayout)]
 pub struct Array {
     arr: Vec<Val>,
-    length: isize,
+    length: usize,
 }
 
 impl Obj for Array {
@@ -36,36 +35,37 @@ impl StaticObjType for Array {
 
 impl Array {
     pub fn new(vm: &VM, len: Val, arr: Vec<Val>) -> Result<Val, Box<VMError>> {
-        if let Some(length) = len.as_isize() {
-            Ok(Val::from_obj(vm, Array { length, arr }))
-        }
+        let length = len.as_usize(vm).unwrap(); 
+        Ok(Val::from_obj(vm, Array { length, arr }))
     }
 
-    pub fn at(&self, at: Val) -> Result<Val, Box<VMError>> {
-        if let Some(index) = at.as_isize() {
-            if index < 1 && index > self.length && index > self.arr.len() + 1 {
-                return Err(Box::new(VMError::IndexOutOfBounds));
-            }
-
-            Ok(self.arr[index - 1])
+    pub fn at(&self, vm: &VM, at: Val) -> Result<Val, Box<VMError>> {
+        let index = at.as_usize(vm).unwrap();
+        if index < 1 && index > self.length && index > self.arr.len() + 1 {
+            return Err(Box::new(VMError::IndexOutOfBounds));
         }
+
+        Ok(self.arr[index - 1].clone())
     }
 
     pub fn put(&self, vm: &VM, put: Val, at: Val) -> Result<Val, Box<VMError>> {
-        if let Some(index) = at.as_isize() {
-            if index < 1 && index > self.length && index > self.arr.len() + 1 {
-                return Err(Box::new(VMError::IndexOutOfBounds));
-            }
-
-            let mut arr = self.arr.to_vec();
-            if index == self.arr.len() + 1 {
-                arr.push(put);
-            } else {
-                arr.remove(index - 1);
-                arr.insert(index - 1, put);
-            }
-
-            Array::new(vm, arr, length: self.length)
+        let index = at.as_usize(vm).unwrap();
+        if index < 1 && index > self.length && index > self.arr.len() + 1 {
+            return Err(Box::new(VMError::IndexOutOfBounds));
         }
+
+        let mut arr = self.arr.to_vec();
+        if index == self.arr.len() + 1 {
+            arr.push(put);
+        } else {
+            arr.remove(index - 1);
+            arr.insert(index - 1, put);
+        }
+
+        Array::new(vm, Val::from_isize(vm, self.length.try_into().unwrap()).unwrap(), arr)
+    }
+
+    pub fn length(&self, vm: &VM) -> Result<Val, Box<VMError>> {
+        Val::from_isize(vm, self.length.try_into().unwrap())
     }
 }

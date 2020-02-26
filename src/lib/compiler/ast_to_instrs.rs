@@ -248,6 +248,7 @@ impl<'a> Compiler<'a> {
                 "instVarAt:" => Ok(MethodBody::Primitive(Primitive::InstVarAt)),
                 "instVarAt:put:" => Ok(MethodBody::Primitive(Primitive::InstVarAtPut)),
                 "instVarNamed:" => Ok(MethodBody::Primitive(Primitive::InstVarNamed)),
+                "length" => Ok(MethodBody::Primitive(Primitive::Length)),
                 "name" => Ok(MethodBody::Primitive(Primitive::Name)),
                 "new" => Ok(MethodBody::Primitive(Primitive::New)),
                 "new:" => Ok(MethodBody::Primitive(Primitive::NewWithLength)),

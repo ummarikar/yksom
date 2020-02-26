@@ -15,7 +15,7 @@ use crate::{
         instrs::{Builtin, Instr, Primitive},
     },
     vm::{
-        objects::{Block, BlockInfo, Class, Double, Inst, Method, MethodBody, ObjType, String_},
+        objects::{Array, Block, BlockInfo, Class, Double, Inst, Method, MethodBody, ObjType, String_},
         somstack::SOMStack,
         val::Val,
     },
@@ -477,11 +477,11 @@ impl VM {
                 SendReturn::Val
             }
             Primitive::At => {
-                unsafe { &mut *self.stack.get() }.push(stry!(rcv.downcast::<Array>(self)).at(self, unsafe { &mut *self.stack.get() }.pop()));
+                unsafe { &mut *self.stack.get() }.push(stry!(stry!(rcv.downcast::<Array>(self)).at(self, unsafe { &mut *self.stack.get() }.pop())));
                 SendReturn::Val
             }
             Primitive::AtPut => {
-                unsafe { &mut *self.stack.get() }.push(stry!(rcv.downcast::<Array>(self)).put(self, unsafe { &mut *self.stack.get() }.pop(), unsafe { &mut *self.stack.get() }.pop()));
+                unsafe { &mut *self.stack.get() }.push(stry!(stry!(rcv.downcast::<Array>(self)).put(self, unsafe { &mut *self.stack.get() }.pop(), unsafe { &mut *self.stack.get() }.pop())));
                 SendReturn::Val
             }
             Primitive::BitXor => {
@@ -570,6 +570,10 @@ impl VM {
                 ));
                 SendReturn::Val
             }
+            Primitive::Length => {
+                unsafe { &mut *self.stack.get() }.push(stry!(stry!(rcv.downcast::<Array>(self)).length(self)));
+                SendReturn::Val
+            }
             Primitive::Mod => {
                 unsafe { &mut *self.stack.get() }.push(stry!(
                     rcv.modulus(self, unsafe { &mut *self.stack.get() }.pop())
@@ -591,9 +595,9 @@ impl VM {
                 SendReturn::Val
             }
             Primitive::NewWithLength => {
-                unsafe { &mut *self.stack.get() }.push(Array::new(self, unsafe { &mut *self.stack.get() }.pop(), Vec::new()));
+                unsafe { &mut *self.stack.get() }.push(stry!(Array::new(self, unsafe { &mut *self.stack.get() }.pop(), Vec::new())));
                 SendReturn::Val
-            }
+           }
             Primitive::NotEquals => {
                 unsafe { &mut *self.stack.get() }.push(stry!(
                     rcv.not_equals(self, unsafe { &mut *self.stack.get() }.pop())
